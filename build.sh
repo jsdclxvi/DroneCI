@@ -43,6 +43,9 @@ MODEL="Redmi Note 9 Pro"
 # The codename of the device
 DEVICE="miatoll"
 
+# Version
+V="R"
+
 # The defconfig which should be used. Get it from config.gz from
 # your device or check source
 DEFCONFIG=cust_defconfig
@@ -244,13 +247,15 @@ gen_zip() {
 		mv "$KERNEL_DIR"/out/arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
 	fi
 	cd AnyKernel3 || exit
-	zip -r9 $ZIPNAME-$DEVICE-"$DATE" * -x .git README.md LICENSE
+	zip -r9 $ZIPNAME-$DEVICE-$V-"$DATE" * -x .git README.md LICENSE
 
 	## Prepare a final zip variable
-	ZIP_FINAL="$ZIPNAME-$DEVICE-R-$DATE.zip"
+	ZIP_FINAL="$ZIPNAME-$DEVICE-$V-$DATE.zip"
+        ## Check MD5SUM
+        MD5CHECK=$(md5sum "$ZIP_FINAL" | cut -d' ' -f1)
 	if [ "$PTTG" = 1 ]
  	then
-		tg_post_build "$ZIP_FINAL" "$CHATID" "✅ Build took : $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
+		tg_post_build "$ZIP_FINAL" "$CHATID" "MD5SUM $MD5CHECK %0A✅ Build took : $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
 	fi
 	cd ..
 }
