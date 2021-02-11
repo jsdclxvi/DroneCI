@@ -41,7 +41,7 @@ ZIPNAME="GengKapak"
 MODEL="Redmi Note 9 Pro"
 
 # The codename of the device
-DEVICE="joyeuse"
+DEVICE="miatoll"
 
 # The defconfig which should be used. Get it from config.gz from
 # your device or check source
@@ -126,7 +126,7 @@ DATE=$(TZ=Asia/Jakarta date +"%Y%m%d-%T")
  clone() {
 	echo " "
 	msg "|| Cloning Clang-13 ||"
-	git clone https://github.com/GengKapak/GengKapak-clang proton
+	git clone --depth 1 --no-single-branch https://github.com/AnggaR96s/GengKapak-clang proton
 		# Toolchain Directory defaults to clang-llvm
 	TC_DIR=$KERNEL_DIR/proton
 
@@ -247,7 +247,7 @@ gen_zip() {
 	zip -r9 $ZIPNAME-$DEVICE-"$DATE" * -x .git README.md LICENSE
 
 	## Prepare a final zip variable
-	ZIP_FINAL="$ZIPNAME-$DEVICE-$DATE.zip"
+	ZIP_FINAL="$ZIPNAME-$DEVICE-R-$DATE.zip"
 	if [ "$PTTG" = 1 ]
  	then
 		tg_post_build "$ZIP_FINAL" "$CHATID" "✅ Build took : $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
