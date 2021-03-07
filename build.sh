@@ -255,7 +255,7 @@ gen_zip() {
         MD5CHECK=$(md5sum "$ZIP_FINAL" | cut -d' ' -f1)
 	if [ "$PTTG" = 1 ]
  	then
-		tg_post_build "$ZIP_FINAL" "$CHATID" "MD5SUM $MD5CHECK %0A✅ Build took : $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
+		tg_post_build "$ZIP_FINAL" "$CHATID" "✅ Build took : $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
 	fi
 	cd ..
 }
