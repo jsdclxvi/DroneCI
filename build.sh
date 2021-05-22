@@ -50,7 +50,7 @@ V="R"
 # your device or check source
 DEFCONFIG=cust_defconfig
 
-# Specify compiler. 
+# Specify compiler.
 # 'clang' or 'gcc'
 COMPILER=clang
 
@@ -121,8 +121,8 @@ KERVER=$(make kernelversion)
 # Set a commit head
 COMMIT_HEAD=$(git -C kernel log --oneline -5)
 
-# Set Date 
-DATE=$(TZ=Asia/Jakarta date +"%Y%m%d-%T")
+# Set Date
+DATE=$(TZ=Asia/Jakarta date +"%F_%H-%M-%S")
 
 #Now Its time for other stuffs like cloning, exporting, etc
 
@@ -147,9 +147,8 @@ exports() {
 
 		KBUILD_COMPILER_STRING=$("$TC_DIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 		PATH=$TC_DIR/bin/:$PATH
-		
 
-	export PATH KBUILD_COMPILER_STRING 
+	export PATH KBUILD_COMPILER_STRING
 	export BOT_MSG_URL="https://api.telegram.org/bot$token/sendMessage"
 	export BOT_BUILD_URL="https://api.telegram.org/bot$token/sendDocument"
 	PROCS=$(nproc --all)
@@ -177,7 +176,17 @@ tg_post_build() {
 	-F chat_id="$2"  \
 	-F "disable_web_page_preview=true" \
 	-F "parse_mode=html" \
-	-F caption="$3 | <code>Build Number : </code><b>$DRONE_BUILD_NUMBER</b>"  
+	-F caption="$3 | <code>Build Number : </code><b>$DRONE_BUILD_NUMBER</b>"
+}
+
+##----------------------------------------------------------##
+
+tg_post_log() {
+        curl --progress-bar -F document=@log.txt \
+        -F chat_id="$2"  \
+        -F "disable_web_page_preview=true" \
+        -F "parse_mode=html" \
+        -F caption="Build LOG"
 }
 
 ##----------------------------------------------------------##
@@ -205,15 +214,14 @@ build_kernel() {
 	fi
 
 	BUILD_START=$(date +"%s")
-	
-	
+
 	if [ $SILENCE = "1" ]
 	then
 		MAKE+=( -s )
 	fi
 
 	msg "|| Started Compilation ||"
-	make -j$(nproc --all) O=out ARCH=arm64 CC=clang LD=ld.lld AR=llvm-ar AS=llvm-as NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- Image.gz-dtb dtbo.img
+	make -j$(nproc --all) O=out ARCH=arm64 CC=clang LD=ld.lld AR=llvm-ar AS=llvm-as NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- Image.gz-dtb dtbo.img 2>&1 | tee log.txt
 		BUILD_END=$(date +"%s")
 		DIFF=$((BUILD_END - BUILD_START))
 
@@ -234,7 +242,7 @@ build_kernel() {
 				tg_post_msg "<b>❌ Build failed to compile after $((DIFF / 60)) minute(s) and $((DIFF % 60)) seconds</b>" "$CHATID"
 			fi
 		fi
-	
+
 }
 
 ##--------------------------------------------------------------##
@@ -263,6 +271,7 @@ gen_zip() {
 clone
 exports
 build_kernel
+tg_post_log
 
 if [ $LOG_DEBUG = "1" ]
 then
