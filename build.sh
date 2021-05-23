@@ -182,7 +182,7 @@ tg_post_build() {
 ##----------------------------------------------------------##
 
 tg_post_log() {
-        curl --progress-bar -F document=@log.txt \
+        curl --progress-bar -F document=@log.txt "$BOT_BUILD_URL" \
         -F chat_id="$2"  \
         -F "disable_web_page_preview=true" \
         -F "parse_mode=html" \
@@ -264,6 +264,7 @@ gen_zip() {
 	if [ "$PTTG" = 1 ]
  	then
 		tg_post_build "$ZIP_FINAL" "$CHATID" "✅ Build took : $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
+                tg_post_log
 	fi
 	cd ..
 }
@@ -271,7 +272,6 @@ gen_zip() {
 clone
 exports
 build_kernel
-tg_post_log
 
 if [ $LOG_DEBUG = "1" ]
 then
