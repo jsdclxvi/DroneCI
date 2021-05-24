@@ -182,7 +182,7 @@ tg_post_build() {
 ##----------------------------------------------------------##
 
 tg_post_log() {
-        curl --progress-bar -F document=@log.txt "$BOT_BUILD_URL" \
+        curl --progress-bar -F document=@"$KERNEL_DIR"/log.txt "$BOT_BUILD_URL" \
         -F chat_id="$2"  \
         -F "disable_web_page_preview=true" \
         -F "parse_mode=html" \
