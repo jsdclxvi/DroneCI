@@ -12,7 +12,7 @@ steps:
         from_secret: BOT_API_KEY
       GITHUB_TOKEN:
         from_secret: GH_TOKEN
-    image: gengkapak/drone:latest
+    image: gengkapak/builder:latest
     name: Build Kernel
     trigger: 
       branch: 
