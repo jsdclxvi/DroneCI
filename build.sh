@@ -35,20 +35,20 @@ err() {
 KERNEL_DIR=$PWD
 
 # The name of the Kernel, to name the ZIP
-ZIPNAME="GengKapak"
+ZIPNAME="JandaX-MaximumSlav"
 
 # The name of the device for which the kernel is built
 MODEL="Redmi Note 9 Pro"
 
 # The codename of the device
-DEVICE="miatoll"
+DEVICE="joyeuse"
 
 # Version
 V="R"
 
 # The defconfig which should be used. Get it from config.gz from
 # your device or check source
-DEFCONFIG=cust_defconfig
+DEFCONFIG=joyeuse_defconfig
 
 # Specify compiler.
 # 'clang' or 'gcc'
@@ -129,7 +129,7 @@ DATE=$(TZ=Asia/Jakarta date +"%F_%H-%M-%S")
  clone() {
 	echo " "
 	msg "|| Cloning Clang-13 ||"
-	git clone --depth 1 --no-single-branch https://github.com/AnggaR96s/GengKapak-clang -b 13 proton
+	git clone --depth 1 --no-single-branch https://gitlab.com/jarviscoldbox/gk-clang-14 -b master proton
 		# Toolchain Directory defaults to clang-llvm
 	TC_DIR=$KERNEL_DIR/proton
 

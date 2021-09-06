@@ -1,3 +1,3 @@
-git clone https://$GITHUB_TOKEN@github.com/AnggaR96s/kernel_xiaomi_sm6250 kernel -b eleven --depth=5 --recurse-submodules
+git clone https://github.com/AnggaR96s/kernel_xiaomi_joyeuse-1 kernel -b eleven --depth=5
 cd kernel
 curl https://raw.githubusercontent.com/ARCHSTNC/DroneCI/main/build.sh | bash
