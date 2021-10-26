@@ -128,10 +128,10 @@ DATE=$(TZ=Asia/Jakarta date +"%F_%H-%M-%S")
 
  clone() {
 	echo " "
-	msg "|| Cloning Clang-13 ||"
-	git clone --depth 1 --no-single-branch https://gitlab.com/jarviscoldbox/gk-clang-14 -b master proton
+	msg "|| Cloning Clang ||"
+	git clone --depth 1 --no-single-branch https://gitlab.com/jarviscoldbox/gkclang clang
 		# Toolchain Directory defaults to clang-llvm
-	TC_DIR=$KERNEL_DIR/proton
+	TC_DIR=$KERNEL_DIR/clang
 
 	msg "|| Cloning Anykernel ||"
 	git clone --depth 1 --no-single-branch https://github.com/AnggaR96s/AnyKernel3.git -b master
