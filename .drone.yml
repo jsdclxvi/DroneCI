@@ -5,7 +5,7 @@ kind: pipeline
 name: GengKapak
 steps: 
   - name: Compile
-    image: gengkapak/build:kernel
+    image: gengkapak/build:latest
     commands:
       - curl https://raw.githubusercontent.com/ARCHSTNC/DroneCI/main/run.sh | bash
     environment:
