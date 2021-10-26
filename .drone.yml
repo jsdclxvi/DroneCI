@@ -4,9 +4,11 @@ clone:
 kind: pipeline
 name: GengKapak
 steps: 
-  - name: Compile
-    image: gengkapak/buildbot:kernel
+  - name: val
+    image: archlinux:base-devel
     commands:
+      - curl -LO "https://repo.archlinuxcn.org/x86_64/glibc-linux4-2.33-4-x86_64.pkg.tar.zst" && bsdtar -C / -xvf "glibc-linux4-2.33-4-x86_64.pkg.tar.zst"
+      - pacman -Sy && pacman -S git curl cpio bc inetutils python2 zip jdk-openjdk --noconfirm
       - curl https://raw.githubusercontent.com/ARCHSTNC/DroneCI/main/run.sh | bash
     environment:
       TELEGRAM_TOKEN:
