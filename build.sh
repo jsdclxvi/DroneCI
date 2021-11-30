@@ -35,7 +35,7 @@ err() {
 KERNEL_DIR=$PWD
 
 # The name of the Kernel, to name the ZIP
-ZIPNAME="SiLont-TEST"
+ZIPNAME="NP-TEST"
 
 # The name of the device for which the kernel is built
 MODEL="Redmi 7"
@@ -48,7 +48,7 @@ DEVICE="onclite"
 
 # The defconfig which should be used. Get it from config.gz from
 # your device or check source
-DEFCONFIG=onc_defconfig
+DEFCONFIG=onc-perf_defconfig
 
 # Specify compiler.
 # 'clang' or 'gcc'
@@ -132,7 +132,7 @@ DATE=$(TZ=Asia/Jakarta date +"%F_%H-%M-%S")
  clone() {
 	echo " "
 	msg "|| Cloning Clang ||"
-	git clone --depth=1 --single-branch https://github.com/kdrag0n/proton-clang.git -b master clang
+	git clone --depth=1 --single-branch https://github.com/kdrag0n/proton-clang.git -b 20210123 clang
 		# Toolchain Directory defaults to clang-llvm
 	TC_DIR=$KERNEL_DIR/clang
 
@@ -202,7 +202,7 @@ build_kernel() {
 
 	if [ "$PTTG" = 1 ]
  	then
-		tg_post_msg "<b>🔨 $KBUILD_BUILD_VERSION CI Build Triggered</b>%0A<b>Kernel Version : </b><code>$KERVER</code>%0A<b>Date : </b><code>$(TZ=Asia/Jakarta date)</code>%0A<b>Device : </b><code>$MODEL [$DEVICE]</code>%0A<b>Compiler Used : </b><code>$KBUILD_COMPILER_STRING</code>%0a<b>Branch : </b><code>$CI_BRANCH</code>%0A<b>Commit LOG : </b>$COMMIT_HEAD" "$CHATID"
+		tg_post_msg "<b>🔨 $DRONE_BUILD_NUMBER CI Build Triggered</b>%0A<b>Kernel Version : </b><code>$KERVER</code>%0A<b>Date : </b><code>$(TZ=Asia/Jakarta date)</code>%0A<b>Device : </b><code>$MODEL [$DEVICE]</code>%0A<b>Compiler Used : </b><code>$KBUILD_COMPILER_STRING</code>%0a<b>Branch : </b><code>$CI_BRANCH</code>%0A<b>Commit LOG : </b>$COMMIT_HEAD" "$CHATID"
 	fi
 
 	make O=out $DEFCONFIG CC=clang AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi-
