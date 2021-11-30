@@ -256,7 +256,7 @@ gen_zip() {
 	then
 		mv "$KERNEL_DIR"/out/arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
 	fi
-	cd AnyKernel3 || exit
+	cd AnyKernel3 && rm -rf modules patch ramdisk || exit
 	zip -r9 $ZIPNAME-$DEVICE-"$DATE" * -x .git README.md LICENSE
 
 	## Prepare a final zip variable
