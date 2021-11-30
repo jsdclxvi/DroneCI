@@ -35,20 +35,20 @@ err() {
 KERNEL_DIR=$PWD
 
 # The name of the Kernel, to name the ZIP
-ZIPNAME="JandaX-MaximumSlav"
+ZIPNAME="SiLont-TEST"
 
 # The name of the device for which the kernel is built
-MODEL="Redmi Note 9 Pro"
+MODEL="Redmi 7"
 
 # The codename of the device
-DEVICE="joyeuse"
+DEVICE="onclite"
 
 # Version
-V="R"
+#V="RS"
 
 # The defconfig which should be used. Get it from config.gz from
 # your device or check source
-DEFCONFIG=joyeuse_defconfig
+DEFCONFIG=onc_defconfig
 
 # Specify compiler.
 # 'clang' or 'gcc'
@@ -62,7 +62,7 @@ PTTG=1
 	if [ $PTTG = 1 ]
 	then
 		# Set Telegram Chat ID
-		CHATID="-1001492198966"
+		CHATID="-1001516573341"
 	fi
 
 # Generate a full DEFCONFIG prior building. 1 is YES | 0 is NO(default)
@@ -99,7 +99,9 @@ if [ -n "$CI" ]
 then
 	if [ -n "$CIRCLECI" ]
 	then
-		export KBUILD_BUILD_VERSION=$CIRCLE_BUILD_NUM
+		#export KBUILD_BUILD_VERSION=$CIRCLE_BUILD_NUM
+		export KBUILD_BUILD_VERSION=1
+		export KBUILD_BUILD_USER="onclite"
 		export KBUILD_BUILD_HOST="CircleCI"
 		export CI_BRANCH=$CIRCLE_BRANCH
 	fi
@@ -107,6 +109,7 @@ then
 	then
 		# export KBUILD_BUILD_VERSION=$DRONE_BUILD_NUMBER
                 export KBUILD_BUILD_VERSION=1
+                export KBUILD_BUILD_USER="onclite"
                 export KBUILD_BUILD_HOST="DroneCI"
 		export CI_BRANCH=$DRONE_BRANCH
 	else
@@ -119,7 +122,7 @@ KERVER=$(make kernelversion)
 
 
 # Set a commit head
-COMMIT_HEAD=$(git -C kernel log --oneline -5)
+COMMIT_HEAD=$(git -C kernel log --oneline -2)
 
 # Set Date
 DATE=$(TZ=Asia/Jakarta date +"%F_%H-%M-%S")
@@ -129,18 +132,17 @@ DATE=$(TZ=Asia/Jakarta date +"%F_%H-%M-%S")
  clone() {
 	echo " "
 	msg "|| Cloning Clang ||"
-	git clone --depth 1 --no-single-branch https://gitlab.com/jarviscoldbox/gkclang clang
+	git clone --depth=1 --single-branch https://github.com/kdrag0n/proton-clang.git -b master clang
 		# Toolchain Directory defaults to clang-llvm
 	TC_DIR=$KERNEL_DIR/clang
 
 	msg "|| Cloning Anykernel ||"
-	git clone --depth 1 --no-single-branch https://github.com/AnggaR96s/AnyKernel3.git -b master
+	git clone --depth=1 https://github.com/risawitama/AnyKernel3.git -b onclite
 }
 
 ##------------------------------------------------------##
 
 exports() {
-	export KBUILD_BUILD_USER="GengKapak"
 	export ARCH=arm64
 	export SUBARCH=arm64
 	export token=$TELEGRAM_TOKEN
@@ -203,7 +205,7 @@ build_kernel() {
 		tg_post_msg "<b>🔨 $KBUILD_BUILD_VERSION CI Build Triggered</b>%0A<b>Kernel Version : </b><code>$KERVER</code>%0A<b>Date : </b><code>$(TZ=Asia/Jakarta date)</code>%0A<b>Device : </b><code>$MODEL [$DEVICE]</code>%0A<b>Compiler Used : </b><code>$KBUILD_COMPILER_STRING</code>%0a<b>Branch : </b><code>$CI_BRANCH</code>%0A<b>Commit LOG : </b>$COMMIT_HEAD" "$CHATID"
 	fi
 
-	make O=out $DEFCONFIG
+	make O=out $DEFCONFIG CC=clang AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi-
 	if [ $DEF_REG = 1 ]
 	then
 		cp .config arch/arm64/configs/$DEFCONFIG
@@ -221,7 +223,7 @@ build_kernel() {
 	fi
 
 	msg "|| Started Compilation ||"
-	make -j$(nproc --all) O=out ARCH=arm64 CC=clang LD=ld.lld AR=llvm-ar AS=llvm-as NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- Image.gz-dtb 2>&1 | tee log.txt
+	make -j$(nproc --all) O=out CC=clang AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- Image.gz-dtb 2>&1 | tee log.txt
 		BUILD_END=$(date +"%s")
 		DIFF=$((BUILD_END - BUILD_START))
 
@@ -233,7 +235,7 @@ build_kernel() {
 				msg "|| Building DTBO ||"
 				tg_post_msg "<code>Building DTBO..</code>" "$CHATID"
 				python2 "$KERNEL_DIR/scripts/ufdt/libufdt/utils/src/mkdtboimg.py" \
-					create "$KERNEL_DIR/out/arch/arm64/boot/dtbo.img" --page_size=4096 "$KERNEL_DIR/out/arch/arm64/boot/dts/qcom/sm6150-idp-overlay.dtbo"
+					create "$KERNEL_DIR/out/arch/arm64/boot/dtbo.img" --page_size=2048 "$KERNEL_DIR/out/arch/arm64/boot/dts/qcom/sm6150-idp-overlay.dtbo"
 			fi
 				gen_zip
 		else
@@ -255,10 +257,10 @@ gen_zip() {
 		mv "$KERNEL_DIR"/out/arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
 	fi
 	cd AnyKernel3 || exit
-	zip -r9 $ZIPNAME-$DEVICE-$V-"$DATE" * -x .git README.md LICENSE
+	zip -r9 $ZIPNAME-$DEVICE-"$DATE" * -x .git README.md LICENSE
 
 	## Prepare a final zip variable
-	ZIP_FINAL="$ZIPNAME-$DEVICE-$V-$DATE.zip"
+	ZIP_FINAL="$ZIPNAME-$DEVICE-$DATE.zip"
         ## Check MD5SUM
         MD5CHECK=$(md5sum "$ZIP_FINAL" | cut -d' ' -f1)
 	if [ "$PTTG" = 1 ]
