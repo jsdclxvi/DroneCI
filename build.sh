@@ -35,7 +35,7 @@ err() {
 KERNEL_DIR=$PWD
 
 # The name of the Kernel, to name the ZIP
-ZIPNAME="SiLont-TEST"
+ZIPNAME="GP-TEST"
 
 # The name of the device for which the kernel is built
 MODEL="Redmi 7"
@@ -48,7 +48,7 @@ DEVICE="onclite"
 
 # The defconfig which should be used. Get it from config.gz from
 # your device or check source
-DEFCONFIG=onc_defconfig
+DEFCONFIG=onc-perf_defconfig
 
 # Specify compiler.
 # 'clang' or 'gcc'
@@ -131,13 +131,17 @@ DATE=$(TZ=Asia/Jakarta date +"%F_%H-%M-%S")
 
  clone() {
 	echo " "
-	msg "|| Cloning Clang ||"
-	git clone --depth=1 --single-branch https://github.com/kdrag0n/proton-clang.git -b master clang
+	msg "|| Cloning Toolchains ||"
+	git clone --depth 1 -b 20210123 --no-tags --single-branch https://github.com/risawitama/proton-clang clang
+	#git clone --depth 1 -b arm64/11 --no-tags --single-branch https://github.com/silont-project/aarch64-silont-linux-gnu gcc64
+	#git clone --depth 1 -b arm/11 --no-tags --single-branch https://github.com/silont-project/arm-silont-linux-gnueabi gcc32
 		# Toolchain Directory defaults to clang-llvm
 	TC_DIR=$KERNEL_DIR/clang
+	#GCC64_DIR=$KERNEL_DIR/gcc64
+	#GCC32_DIR=$KERNEL_DIR/gcc32
 
 	msg "|| Cloning Anykernel ||"
-	git clone --depth=1 https://github.com/risawitama/AnyKernel3.git -b onclite
+	git clone --depth 1 -b onclite --no-tags --single-branch https://github.com/risawitama/AnyKernel3
 }
 
 ##------------------------------------------------------##
@@ -149,6 +153,9 @@ exports() {
 
 		KBUILD_COMPILER_STRING=$("$TC_DIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 		PATH=$TC_DIR/bin/:$PATH
+		#export LD_LIBRARY_PATH=$TC_DIR/lib64:$LD_LIBRARY_PATH
+		#export CROSS_COMPILE=$GCC64_DIR/bin/aarch64-silont-linux-gnu-
+		#export CROSS_COMPILE_ARM32=$GCC32_DIR/bin/arm-silont-linux-gnueabi-
 
 	export PATH KBUILD_COMPILER_STRING
 	export BOT_MSG_URL="https://api.telegram.org/bot$token/sendMessage"
@@ -197,15 +204,15 @@ build_kernel() {
 	if [ $INCREMENTAL = 0 ]
 	then
 		msg "|| Cleaning Sources ||"
-		make clean && make mrproper && rm -rf out
+		make clean && make mrproper
 	fi
 
 	if [ "$PTTG" = 1 ]
  	then
-		tg_post_msg "<b>🔨 $KBUILD_BUILD_VERSION CI Build Triggered</b>%0A<b>Kernel Version : </b><code>$KERVER</code>%0A<b>Date : </b><code>$(TZ=Asia/Jakarta date)</code>%0A<b>Device : </b><code>$MODEL [$DEVICE]</code>%0A<b>Compiler Used : </b><code>$KBUILD_COMPILER_STRING</code>%0a<b>Branch : </b><code>$CI_BRANCH</code>%0A<b>Commit LOG : </b>$COMMIT_HEAD" "$CHATID"
+		tg_post_msg "<b>🔨 $DRONE_BUILD_NUMBER CI Build Triggered</b>%0A<b>Kernel Version : </b><code>$KERVER</code>%0A<b>Date : </b><code>$(TZ=Asia/Jakarta date)</code>%0A<b>Device : </b><code>$MODEL [$DEVICE]</code>%0A<b>Compiler Used : </b><code>$KBUILD_COMPILER_STRING</code>%0a<b>Branch : </b><code>$CI_BRANCH</code>%0A<b>Commit LOG : </b>$COMMIT_HEAD" "$CHATID"
 	fi
 
-	make O=out $DEFCONFIG CC=clang AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi-
+	make O=out $DEFCONFIG CC=clang
 	if [ $DEF_REG = 1 ]
 	then
 		cp .config arch/arm64/configs/$DEFCONFIG
@@ -223,7 +230,7 @@ build_kernel() {
 	fi
 
 	msg "|| Started Compilation ||"
-	make -j$(nproc --all) O=out CC=clang AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- Image.gz-dtb 2>&1 | tee log.txt
+	make -j"$PROCS" O=out CC=clang AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- Image.gz-dtb 2>&1 | tee log.txt
 		BUILD_END=$(date +"%s")
 		DIFF=$((BUILD_END - BUILD_START))
 

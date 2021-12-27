@@ -1,3 +1,3 @@
-git clone https://github.com/risawitama/kernel_xiaomi_onclite.git --branch lont-R2 --depth=2 kernel
+git clone --depth 2 -b lineage-19.0-merging --no-tags --single-branch https://github.com/risawitama/android_kernel_xiaomi_onc kernel
 cd kernel
-curl https://raw.githubusercontent.com/jsdclxvi/DroneCI/silont/build.sh | bash
+curl https://raw.githubusercontent.com/jsdclxvi/DroneCI/gp/build.sh | bash
