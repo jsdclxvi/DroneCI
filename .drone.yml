@@ -2,17 +2,79 @@
 Clone: 
   depth: 1
 kind: pipeline
-name: GengKapak
+name: "Setting Up, Syncing, Building and Uploading..."
 steps: 
   - name: Compile
-    image: gengkapak/build:latest
-    commands:
-      - curl https://raw.githubusercontent.com/jsdclxvi/DroneCI/silont/run.sh | bash
+    image: inok2341/anu:latest
+    trigger: 
+      branch: 
+        - rom-builder
     environment:
       TELEGRAM_TOKEN:
         from_secret: BOT_API_KEY
       GITHUB_TOKEN:
         from_secret: GH_TOKEN
-    trigger: 
-      branch: 
-        - silont
+      DRIVE_CONFIG:
+        from_secret: RCLONE_KEY
+    commands:
+      - curl -s https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage -d chat_id=$idtl -d text="Setup Build"
+      - export DEBIAN_FRONTEND=noninteractive
+      - apt update
+      - apt install sudo
+      - mkdir -p ~/.config/rclone
+      - echo "$DRIVE_CONFIG" > ~/.config/rclone/rclone.conf
+      - DEBIAN_FRONTEND=noninteractive
+      - sudo apt install python3 -y
+      - sudo ln -sf /usr/bin/python3 /usr/bin/python
+      - git config --global user.name "Leon4rd"
+      - git config --global user.email "38402513+leon4rd@users.noreply.github.com"
+      - mkdir -p /tmp/ccache
+      - rclone copy rclonerw:los/ccache.tar.gz /tmp -P
+      - cd /tmp
+      - time tar xf ccache.tar.gz
+      - cd /tmp
+      - df -h
+      - lsblk
+      - ls -l -a -h
+      - echo "============================"
+      - echo "Syncing The Sources..."
+      - echo "============================"
+      - curl -s https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage -d chat_id=$idtl -d text="Start sync Source"
+      - cd /tmp/rom
+      - repo init -q --no-repo-verify --depth=1 -u git://github.com/LineageOS/android.git -b lineage-18.1 -g default,-device,-mips,-darwin,-notdefault
+      - repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j8
+      # DT/VT/KT/TC
+      - git clone --depth=1 https://github.com/LineageOS/android_device_xiaomi_onclite --single-branch -b lineage-18.1 device/xiaomi/onclite
+      - git clone --depth=1 https://github.com/Dhina17/android_vendor_xiaomi_onclite --single-branch -b lineage-18.1 vendor/xiaomi/onclite
+      - git clone --depth=1 https://github.com/LineageOS/android_kernel_xiaomi_onclite --single-branch -b lineage-18.1 kernel/xiaomi/onclite
+      # HALS
+#
+      - curl -s https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage -d chat_id=$idtl -d text="Sync Completed!"
+      - echo "============================"
+      - echo "Sync Completed!"
+      - echo "============================"
+      - echo "============================"
+      - echo "Starting the Build..."
+      - echo "============================"
+      - ./collect.sh
+#      - ./final.sh
+      - curl -s https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage -d chat_id=$idtl -d text="Build $(cd /tmp/rom/out/target/product/onclite/ && ls lineage*.zip) Completed!"
+      - echo "============================"
+      - echo "Build Completed!"
+      - echo "============================"
+      - echo "============================"
+      - echo "Uploading the Build...."
+      - echo "============================"
+      - curl -s https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage -d chat_id=$idtl -d text="Uploading Build $(cd /tmp/rom/out/target/product/onclite/ && ls lineage*.zip)"
+#      - rclone copy /tmp/rom/out/target/product/onclite/lineage*.zip rclonerw:onclite -P
+      - curl -s https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage -d chat_id=$idtl -d text="Build $(cd /tmp/rom/out/target/product/onclite/ && ls lineage*.zip) Uploaded Successfully!"
+      - curl -s https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage -d chat_id=$idtl -d text="Download link https://mirror.rsdclxvi.workers.dev/cirrus/onclite/$(cd /tmp/rom/out/target/product/onclite/ && ls lineage*.zip)"
+      - curl -s https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage -d chat_id=$idtl -d text="Compres ccache"
+      - ./ziping.sh
+      - cd /tmp
+      - curl -s https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage -d chat_id=$idtl -d text="Uploading ccache...."
+      - rclone copy ccache.tar.gz rclonerw:los -P
+      - echo " "
+      - echo "============================"
+      - echo "Build Uploaded Successfully!"
+      - echo "============================"
