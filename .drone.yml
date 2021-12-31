@@ -1,3 +1,10 @@
+git clone https://github.com/AospExtended/platform_hardware_qcom_audio -b 12.x-caf-msm8996 hardware/qcom-caf/msm8996/audio && git clone https://github.com/AospExtended/platform_hardware_qcom_display -b 12.x-caf-msm8996 hardware/qcom-caf/msm8996/display && git clone https://github.com/AospExtended/platform_hardware_qcom_media -b 12.x-caf-msm8996 hardware/qcom-caf/msm8996/media
+
+
+
+
+
+
 --- 
 Clone: 
   depth: 1
@@ -8,7 +15,7 @@ steps:
     image: inok2341/anu:latest
     trigger: 
       branch: 
-        - rom-builder
+        - main
     environment:
       TELEGRAM_TOKEN:
         from_secret: BOT_API_KEY
@@ -16,6 +23,8 @@ steps:
         from_secret: GH_TOKEN
       DRIVE_CONFIG:
         from_secret: RCLONE_KEY
+      idtl:
+        from_secret: GROUP_TG
     commands:
       - curl -s https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage -d chat_id=$idtl -d text="Setup Build"
       - export DEBIAN_FRONTEND=noninteractive
@@ -56,7 +65,9 @@ steps:
       - echo "============================"
       - echo "Starting the Build..."
       - echo "============================"
+      - chmod a+x collect.sh
       - ./collect.sh
+#      - chmod a+x final.sh
 #      - ./final.sh
       - curl -s https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage -d chat_id=$idtl -d text="Build $(cd /tmp/rom/out/target/product/onclite/ && ls lineage*.zip) Completed!"
       - echo "============================"
@@ -70,6 +81,7 @@ steps:
       - curl -s https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage -d chat_id=$idtl -d text="Build $(cd /tmp/rom/out/target/product/onclite/ && ls lineage*.zip) Uploaded Successfully!"
       - curl -s https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage -d chat_id=$idtl -d text="Download link https://mirror.rsdclxvi.workers.dev/cirrus/onclite/$(cd /tmp/rom/out/target/product/onclite/ && ls lineage*.zip)"
       - curl -s https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage -d chat_id=$idtl -d text="Compres ccache"
+      - chmod a+x ziping.sh
       - ./ziping.sh
       - cd /tmp
       - curl -s https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage -d chat_id=$idtl -d text="Uploading ccache...."
