@@ -33,7 +33,7 @@ steps:
       - mkdir -p /tmp/ccache
 #      - rclone copy rclonerw:los/ccache.tar.gz /tmp -P
       - cd /tmp
-      - time tar xf ccache.tar.gz
+#      - time tar xf ccache.tar.gz
       - cd /tmp
       - df -h
       - lsblk
