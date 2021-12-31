@@ -31,7 +31,7 @@ steps:
       - git config --global user.name "Leon4rd"
       - git config --global user.email "38402513+leon4rd@users.noreply.github.com"
       - mkdir -p /tmp/ccache
-      - rclone copy rclonerw:los/ccache.tar.gz /tmp -P
+#      - rclone copy rclonerw:los/ccache.tar.gz /tmp -P
       - cd /tmp
       - time tar xf ccache.tar.gz
       - cd /tmp
